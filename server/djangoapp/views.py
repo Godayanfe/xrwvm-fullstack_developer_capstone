@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def login_user(request):
     data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
+    username = data["userName"]
+    password = data["password"]
     user = authenticate(username=username, password=password)
     data = {"userName": username}
     if user is not None:
@@ -34,11 +34,11 @@ def logout_user(request):
 @csrf_exempt
 def register_user(request):
     data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
-    first_name = data['firstName']
-    last_name = data['lastName']
-    email = data['email']
+    username = data["userName"]
+    password = data["password"]
+    first_name = data["firstName"]
+    last_name = data["lastName"]
+    email = data["email"]
     try:
         User.objects.get(username=username)
         return JsonResponse({"userName": username,
@@ -61,7 +61,7 @@ def get_cars(request):
     print(count)
     if count == 0:
         initiate()
-    car_models = CarModel.objects.select_related('car_make')
+    car_models = CarModel.objects.select_related("car_make")
     cars = []
     for car_model in car_models:
         cars.append({"CarModel": car_model.name,
@@ -73,14 +73,14 @@ def get_dealerships(request, state="All"):
     if (state == "All"):
         endpoint = "/fetchDealers"
     else:
-        endpoint = "/fetchDealers/"+state
+        endpoint = "/fetchDealers/" + state
     dealerships = get_request(endpoint)
     return JsonResponse({"status": 200, "dealers": dealerships})
 
 
 def get_dealer_details(request, dealer_id):
     if (dealer_id):
-        endpoint = "/fetchDealer/"+str(dealer_id)
+        endpoint = "/fetchDealer/" + str(dealer_id)
         dealership = get_request(endpoint)
         return JsonResponse({"status": 200, "dealer": dealership})
     else:
@@ -89,12 +89,12 @@ def get_dealer_details(request, dealer_id):
 
 def get_dealer_reviews(request, dealer_id):
     if (dealer_id):
-        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
+        endpoint = "/fetchReviews/dealer/" + str(dealer_id)
         reviews = get_request(endpoint)
         for review_detail in reviews:
-            response = analyze_review_sentiments(review_detail['review'])
+            response = analyze_review_sentiments(review_detail["review"])
             print(response)
-            review_detail['sentiment'] = response['sentiment']
+            review_detail["sentiment"] = response["sentiment"]
         return JsonResponse({"status": 200, "reviews": reviews})
     else:
         return JsonResponse({"status": 400, "message": "Bad Request"})
