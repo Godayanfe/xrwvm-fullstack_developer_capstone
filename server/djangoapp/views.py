@@ -5,14 +5,14 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import logout
 from django.contrib import messages
 from datetime import datetime
-
 from django.http import JsonResponse
 from django.contrib.auth import login, authenticate
 import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
+from .populate import initiate
+from .models import CarMake, CarModel
 
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
@@ -46,13 +46,10 @@ def register_user(request):
     first_name = data['firstName']
     last_name = data['lastName']
     email = data['email']
-
     try:
-        # Check if user already exists
         User.objects.get(username=username)
         return JsonResponse({"userName": username, "error": "Already Registered"})
     except User.DoesNotExist:
-        # Create new user
         user = User.objects.create_user(
             username=username,
             first_name=first_name,
@@ -62,3 +59,16 @@ def register_user(request):
         )
         login(request, user)
         return JsonResponse({"userName": username, "status": "Authenticated"})
+
+
+# Get cars view
+def get_cars(request):
+    count = CarMake.objects.filter().count()
+    print(count)
+    if count == 0:
+        initiate()
+    car_models = CarModel.objects.select_related('car_make')
+    cars = []
+    for car_model in car_models:
+        cars.append({"CarModel": car_model.name, "CarMake": car_model.car_make.name})
+    return JsonResponse({"CarModels": cars})
